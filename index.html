@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Travels Map</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+        body {
+            display: flex;
+            flex-direction: row;
+        }
+        #sidebar {
+            width: 18%;
+            background-color: #f8f9fa;
+            padding: 10px;
+            position: fixed;
+            height: 100vh;
+            overflow-y: hidden;
+            box-shadow: 2px 0px 5px rgba(0, 0, 0, 0.3);
+        }
+        #sidebar h1 {
+            font-size: 16px;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        #sidebar input {
+            width: 85%;
+            padding: 5px;
+            margin-bottom: 8px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        #sidebar ul {
+            list-style-type: none;
+            padding: 0;
+            max-height: calc(100vh - 100px);
+            overflow-y: auto;
+        }
+        /* Remove the general hover rule for all li elements */
+        #sidebar li {
+            margin-bottom: 5px;
+        }
+        /* Only apply hover styling to items with data-country */
+        #sidebar li[data-country] {
+            cursor: pointer;
+        }
+        #sidebar li[data-country]:hover {
+            text-decoration: underline;
+        }
+        #sidebar li span.country-name {
+            font-weight: bold;
+            color: #007bff;
+        }
+        #sidebar li span.country-type {
+            font-style: italic;
+            color: #555;
+        }
+        #map {
+            flex-grow: 1;
+            height: 100vh;
+            margin-left: 18%;
+        }
+        .selected {
+            color: #0056b3;
+            font-weight: bold;
+            text-decoration: underline;
+        }
+        /* Add a small left margin for continent titles */
+        #country-list > li {
+        margin-left: 10px; /* Adjust as needed */
+        }
+
+        /* Add a bigger left margin for countries */
+        #country-list > li ul li {
+        margin-left: 20px; /* Adjust as needed */
+        }
+
+    </style>
+</head>
+<body>
+<div id="sidebar">
+    <h1>Countries Visited</h1>
+    <input type="text" id="search" placeholder="Search countries...">
+    <ul id="country-list">
+        <li><strong>South America</strong>
+            <ul>
+                <li data-country="Brazil"><span class="country-name">Brazil</span> - <span class="country-type">Born and Raised</span></li>
+                <li data-country="Argentina"><span class="country-name">Argentina</span> - <span class="country-type">Pleasure</span></li>
+                <li data-country="Paraguay"><span class="country-name">Paraguay</span> - <span class="country-type">Pleasure</span></li>
+            </ul>
+        </li>
+        <li><strong>Europe</strong>
+            <ul>
+                <li data-country="Austria"><span class="country-name">Austria</span> - <span class="country-type">Work/Study/Residence</span></li>
+                <li data-country="Greece"><span class="country-name">Greece</span> - <span class="country-type">Work/Residence</span></li>
+                <li data-country="Italy"><span class="country-name">Italy</span> - <span class="country-type">Work</span></li>
+                <li data-country="Portugal"><span class="country-name">Portugal</span> - <span class="country-type">Work</span></li>
+                <li data-country="France"><span class="country-name">France</span> - <span class="country-type">Pleasure</span></li>
+                <li data-country="Germany"><span class="country-name">Germany</span> - <span class="country-type">Pleasure</span></li>
+                <li data-country="Hungary"><span class="country-name">Hungary</span> - <span class="country-type">Pleasure</span></li>
+                <li data-country="Poland"><span class="country-name">Poland</span> - <span class="country-type">Pleasure</span></li>
+                <li data-country="Letonia"><span class="country-name">Letonia</span> - <span class="country-type">Pleasure</span></li>
+                <li data-country="Romania"><span class="country-name">Romania</span> - <span class="country-type">Pleasure</span></li>
+                <li data-country="Czech Republic"><span class="country-name">Czech Republic</span> - <span class="country-type">Pleasure</span></li>
+                <li data-country="Slovakia"><span class="country-name">Slovakia</span> - <span class="country-type">Pleasure</span></li>
+                <li data-country="Belgium"><span class="country-name">Belgium</span> - <span class="country-type">Pleasure</span></li>
+                <li data-country="Netherlands"><span class="country-name">Netherlands</span> - <span class="country-type">Pleasure</span></li>
+                <li data-country="England"><span class="country-name">England</span> - <span class="country-type">Pleasure</span></li>
+                <li data-country="Wales"><span class="country-name">Wales</span> - <span class="country-type">Pleasure</span></li>
+                <li data-country="Spain"><span class="country-name">Spain</span> - <span class="country-type">Pleasure</span></li>
+                <li data-country="Vatican City"><span class="country-name">Vatican City</span> - <span class="country-type">Pleasure</span></li>
+            </ul>
+        </li>
+        <li><strong>Asia</strong>
+            <ul>
+                <li data-country="Indonesia"><span class="country-name">Indonesia</span> - <span class="country-type">Work</span></li>
+                <li data-country="Thailand"><span class="country-name">Thailand</span> - <span class="country-type">Pleasure</span></li>
+                <li data-country="Nepal"><span class="country-name">Nepal</span> - <span class="country-type">Pleasure</span></li>
+            </ul>
+        </li>
+        <li><strong>North America</strong>
+            <ul>
+                <li data-country="United States"><span class="country-name">United States</span> - <span class="country-type">Pleasure</span></li>
+                <li data-country="Canada"><span class="country-name">Canada</span> - <span class="country-type">Pleasure</span></li>
+                <li data-country="Mexico"><span class="country-name">Mexico</span> - <span class="country-type">Pleasure</span></li>
+                <li data-country="Guatemala"><span class="country-name">Guatemala</span> - <span class="country-type">Work</span></li>
+            </ul>
+        </li>
+        <li><strong>Africa</strong>
+            <ul>
+                <li data-country="Egypt"><span class="country-name">Egypt</span> - <span class="country-type">Work</span></li>
+            </ul>
+        </li>
+     </ul>
+</div>
+<div id="map"></div>
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+<script>
+   const countries = [
+        { name: "Brazil", type: "Born and Raised", coords: [-14.2350, -51.9253], info: "Capital: Brasília, Population: 213.3M" },
+        { name: "Austria", type: "Work/Study/Residence", coords: [47.5162, 14.5501], info: "Capital: Vienna, Population: 8.9M" },
+        { name: "Greece", type: "Work/Residence", coords: [39.0742, 21.8243], info: "Capital: Athens, Population: 10.4M" },
+        { name: "Indonesia", type: "Work", coords: [-0.7893, 113.9213], info: "Capital: Jakarta, Population: 273.5M" },
+        { name: "Egypt", type: "Work", coords: [26.8206, 30.8025], info: "Capital: Cairo, Population: 102.3M" },
+        { name: "Portugal", type: "Work", coords: [39.3999, -8.2245], info: "Capital: Lisbon, Population: 10.2M" },
+        { name: "Italy", type: "Work", coords: [41.8719, 12.5674], info: "Capital: Rome, Population: 59.55M" },
+        { name: "Guatemala", type: "Work", coords: [15.7835, -90.2308], info: "Capital: Guatemala City, Population: 17.2M" },
+        { name: "Turkey", type: "Work", coords: [38.9637, 35.2433], info: "Capital: Ankara, Population: 85.0M" },
+        { name: "United States", type: "Pleasure", coords: [37.0902, -95.7129], info: "Capital: Washington, D.C., Population: 331M" },
+        { name: "Poland", type: "Pleasure", coords: [51.9194, 19.1451], info: "Capital: Warsaw, Population: 37.95M" },
+        { name: "Letonia", type: "Pleasure", coords: [58.5953, 25.0136], info: "Capital: Riga, Population: 1.89M" },
+        { name: "Russia", type: "Pleasure", coords: [61.5240, 105.3188], info: "Capital: Moscow, Population: 145.8M" },
+        { name: "Ukraine", type: "Pleasure", coords: [48.3794, 31.1656], info: "Capital: Kyiv, Population: 44.13M" },
+        { name: "Mexico", type: "Pleasure", coords: [23.6345, -102.5528], info: "Capital: Mexico City, Population: 126.2M" },
+        { name: "Hungary", type: "Pleasure", coords: [47.1625, 19.5033], info: "Capital: Budapest, Population: 9.63M" },
+        { name: "Czech Republic", type: "Pleasure", coords: [49.8175, 15.4730], info: "Capital: Prague, Population: 10.7M" },
+        { name: "Romania", type: "Pleasure", coords: [45.9432, 24.9668], info: "Capital: Bucharest, Population: 19.1M" },
+        { name: "Germany", type: "Pleasure", coords: [51.1657, 10.4515], info: "Capital: Berlin, Population: 83.2M" },
+        { name: "England", type: "Pleasure", coords: [52.3555, -1.1743], info: "Capital: London, Population: 56.2M" },
+        { name: "Wales", type: "Pleasure", coords: [52.1307, -3.7837], info: "Capital: Cardiff, Population: 3.1M" },
+        { name: "Argentina", type: "Pleasure", coords: [-38.4161, -63.6167], info: "Capital: Buenos Aires, Population: 45.38M" },
+        { name: "Paraguay", type: "Pleasure", coords: [-23.4425, -58.4438], info: "Capital: Asunción, Population: 7.13M" },
+        { name: "Thailand", type: "Pleasure", coords: [15.8700, 100.9925], info: "Capital: Bangkok, Population: 69.8M" },
+        { name: "Belgium", type: "Pleasure", coords: [50.8503, 4.3517], info: "Capital: Brussels, Population: 11.59M" },
+        { name: "Bulgaria", type: "Pleasure", coords: [42.7339, 25.4858], info: "Capital: Sofia, Population: 6.8M" },
+        { name: "Canada", type: "Pleasure", coords: [56.1304, -106.3468], info: "Capital: Ottawa, Population: 38.01M" },
+        { name: "France", type: "Pleasure", coords: [46.6034, 1.8883], info: "Capital: Paris, Population: 67.39M" },
+        { name: "Nepal", type: "Pleasure", coords: [28.3949, 84.1240], info: "Capital: Kathmandu, Population: 29.14M" },
+        { name: "Spain", type: "Pleasure", coords: [40.4637, -3.7492], info: "Capital: Madrid, Population: 47.35M" },
+        { name: "Netherlands", type: "Pleasure", coords: [52.1326, 5.2913], info: "Capital: Amsterdam, Population: 17.44M" },
+        { name: "Vatican City", type: "Pleasure", coords: [41.9029, 12.4534], info: "Capital: Vatican City, Population: 800" },
+        { name: "Malaysia", type: "Pleasure", coords: [4.2105, 101.9758], info: "Capital: Kuala Lumpur, Population: 32.7M" },
+        { name: "Slovakia", type: "Pleasure", coords: [48.6690, 19.6990], info: "Capital: Bratislava, Population: 5.45M" }
+    ];
+
+    const map = L.map('map').setView([20, 0], 2);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+    const markers = {};
+
+    // Populate the map markers
+    countries.forEach((country) => {
+        const marker = L.marker(country.coords).addTo(map)
+            .bindPopup(`<b>${country.name}</b><br>${country.type}<br>${country.info}`);
+        markers[country.name] = marker;
+    });
+
+    // Focus map on selected country
+    function focusCountry(name) {
+        Object.keys(markers).forEach((key) => {
+            if (key === name) {
+                map.setView(markers[key].getLatLng(), 5);
+                markers[key].openPopup();
+            }
+        });
+    }
+
+    // Add click events to individual countries
+    document.querySelectorAll('[data-country]').forEach((item) => {
+        item.addEventListener('click', () => {
+            const countryName = item.getAttribute('data-country');
+            focusCountry(countryName);
+        });
+    });
+
+    // Highlight selected country in sidebar
+    document.getElementById('search').addEventListener('input', (e) => {
+        const query = e.target.value.toLowerCase();
+        Array.from(document.querySelectorAll('#country-list ul > li[data-country]')).forEach((item) => {
+            item.style.display = item.textContent.toLowerCase().includes(query) ? '' : 'none';
+        });
+    });
+</script>
+</body>
+</html>
